@@ -1,0 +1,80 @@
+{% extends "user_layout.html" %}
+
+{% block title %}
+<div class="container">
+    <div class="row top">
+        <div class="col-lg-12 mx-auto">
+            <h2 class="text-center text-uppercase text-secondary mb-0">Placement Search</h2>
+            <hr class="star-dark mb-5">
+            <div class="container">
+                <div class="row">
+
+                    {% csrf_token %}
+                    <select class="form-control form-control-lg" id="sem">
+                        <option value="-1">Select</option>
+                        {% for x in sem %}
+                        <option value="{{x.id}}">{{x.name}}</option>
+                        {% endfor %}
+                    </select>
+
+                    Technical
+                    <input class="form-control" id="tech" name="technical" type="text">
+                    Aptitude
+                    <input class="form-control" id="apti" name="technical" type="text">
+
+                    <button id="bid" type="button" class="btn btn-primary">Search</button>
+
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <!--<th scope="col">#</th>-->
+                            <th scope="col">User_id</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">View</th>
+                        </tr>
+                        </thead>
+                        <tbody id="add">
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+      $("#bid").click(function(event) {
+      url = "/search";
+      var posting = $.post( url, {
+        'sem': $('#sem').val(),
+        'tech': $('#tech').val(),
+        'apti': $('#apti').val(),
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      });
+      posting.done(function( data ) {
+
+            var ob = JSON.parse(data);
+             $('#add').html('')
+          for(var i=0; i < ob.length; i++){
+
+            $('#add').append('<tr>')
+            $('#add').append('<td>'+ob[i].pk+'</td>')
+            $('#add').append('<td>'+ob[i].fields.name+'</td>')
+            $('#add').append('<td><a href="/show/'+ob[i].pk+'" class="btn btn-success">Show</a> </td>')
+            $('#add').append('</tr>')
+
+            }
+
+        });
+      });
+
+
+</script>
+
+
+{% endblock %}
+

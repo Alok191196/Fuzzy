@@ -1,0 +1,172 @@
+{% extends "user_layout.html" %}
+
+{% block title %}
+<div class="container">
+    <div class="row top">
+        <div class="col-lg-12 mx-auto">
+            <h2 class="text-center text-uppercase text-secondary mb-0">Add Data</h2>
+            <hr class="star-dark mb-5">
+            <div class="container">
+                <div class="row">
+
+                    {% csrf_token %}
+                    <select class="form-control form-control-lg" id="bid">
+                        <option value="-1">Select</option>
+
+                        {% for x in data %}
+                        <option value="{{x.id}}">{{x.name}}</option>
+                        {% endfor %}
+                    </select>
+
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <!--<th scope="col">#</th>-->
+                            <th scope="col">User_id</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Change</th>
+                            <th scope="col">View</th>
+                        </tr>
+                        </thead>
+                        <tbody id="add">
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="/save_marks" method="post">
+                {% csrf_token %}
+
+                <div class="modal-body">
+                    <select name="semid" class="form-control form-control-lg" id="sid">
+                        <option value="-1">Select</option>
+
+                        {% for x in sem %}
+                        <option value="{{x.id}}">{{x.name}}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="branchid" value="" id="branchid">
+                    <input type="hidden" name="count" value="" id="count">
+                    <input type="hidden" value="" name="studentid" id="studentid">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Subject</th>
+                            <th scope="col">Internal</th>
+                            <th scope="col">External</th>
+                        </tr>
+                        </thead>
+                        <tbody id="add1">
+
+                        </tbody>
+                    </table>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <input type="submit" class="btn btn-primary" value="submit">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+      $("#bid").change(function(event) {
+      url = "/student";
+      var posting = $.post( url, {
+        'branch': this.value,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      });
+      posting.done(function( data ) {
+
+            var ob = JSON.parse(data);
+             $('#add').html('')
+          for(var i=0; i < ob.length; i++){
+
+            $('#add').append('<tr>')
+            $('#add').append('<td>'+ob[i].pk+'</td>')
+            $('#add').append('<td>'+ob[i].fields.name+'</td>')
+            $('#add').append('<td><button type="button" class="btn btn-primary" data-value="'+ob[i].pk+'|'+$("#bid").val()+'" data-toggle="modal" data-target="#exampleModal">Edit</button></td>')
+            $('#add').append('<td><a href="/show/'+ob[i].pk+'" class="btn btn-success">Show</a> </td>')
+            $('#add').append('</tr>')
+
+            }
+
+        });
+      });
+
+
+
+        $("#sid").change(function(event) {
+      url = "/subject";
+      var posting = $.post( url, {
+        'branch': $("#branchid").val(),
+        'sem': this.value,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      });
+      posting.done(function( data ) {
+
+            var ob = JSON.parse(data);
+             $('#add1').html('')
+             $("#count").val(ob.length);
+
+          for(var i=0; i < ob.length; i++){
+
+            $('#add1').append('<tr>')
+            $('#add1').append('<td>'+ob[i].fields.name+'</td>')
+            $('#add1').append('<input class="form-control" name="subjid'+i+'"  value="'+ob[i].pk+'" type="hidden">')
+            $('#add1').append('<td><input class="form-control" name="int'+i+'" type="text" placeholder="Marks"></td>')
+            $('#add1').append('<td><input class="form-control" name="ext'+i+'"  type="text" placeholder="Marks"></td>')
+            $('#add1').append('</tr>')
+
+            }
+            $('#add1').append('<tr>')
+            $('#add1').append('<td>Attendance</td>')
+            $('#add1').append('<td colspan="2"><input class="form-control" name="attn"  type="text" placeholder="Attendance"></td>')
+            $('#add1').append('</tr>')
+
+            $('#add1').append('<tr>')
+            $('#add1').append('<td>Technical</td>')
+            $('#add1').append('<td colspan="2"><input class="form-control" name="tech"  type="text" placeholder="Technical"></td>')
+            $('#add1').append('</tr>')
+
+
+            $('#add1').append('<tr>')
+            $('#add1').append('<td>Aptitude</td>')
+            $('#add1').append('<td colspan="2"><input class="form-control" name="apti"  type="text" placeholder="Aptitude"></td>')
+            $('#add1').append('</tr>')
+
+        });
+      });
+
+$('#exampleModal').on('show.bs.modal', function (e) {
+      var str = $(e.relatedTarget).data('value');
+       $("#branchid").val(str.split("|")[1]);
+       $("#studentid").val(str.split("|")[0]);
+});
+
+
+</script>
+
+
+{% endblock %}
+

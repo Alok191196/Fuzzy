@@ -1,0 +1,79 @@
+{% extends "user_layout.html" %}
+
+{% block title %}
+<div class="container">
+    <div class="row top">
+        <div class="col-lg-9 mx-auto">
+            <h2 class="text-center text-uppercase text-secondary mb-0">Fuzzy logic</h2>
+            <hr class="star-dark mb-5">
+            <div class="container">
+                <div class="row">
+                    {% csrf_token %}
+                    <select class="form-control form-control-lg" id="sem">
+                        <option value="-1">Select</option>
+                        {% for x in sem %}
+                        <option value="{{x.id}}">{{x.name}}</option>
+                        {% endfor %}
+                    </select>
+
+                    <canvas id="myChart"></canvas>
+                    <h1 id="result"></h1>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+
+      $("#sem").change(function(event) {
+      url = "/algo";
+      var posting = $.post( url, {
+        'sem': this.value,
+        'stud':{{idn}},
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      });
+      posting.done(function( data ) {
+            var myBarChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                "labels": ["Internal", "External", "Attendance", "Technical", "Aptitude"],
+                "datasets": [{
+                    "label": "data",
+                    "data": data.split("|"),
+                    "fill": false,
+                    "backgroundColor": ["rgba(255, 99, 132, 0.2)", "rgba(155, 159, 64, 0.2)", "rgba(255, 205, 86, 0.2)", "rgba(215, 205, 86, 0.2)", "rgba(255, 205, 26, 0.2)"],
+                    "borderWidth": 1
+                }]
+            },
+                options: {}
+            });
+        });
+
+      url = "/algo1";
+      var posting = $.post( url, {
+        'sem': this.value,
+        'stud':{{idn}},
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      });
+      posting.done(function( data ) {
+
+            $("#result").html(data);
+            });
+
+
+ });
+
+
+
+</script>
+
+
+{% endblock %}
